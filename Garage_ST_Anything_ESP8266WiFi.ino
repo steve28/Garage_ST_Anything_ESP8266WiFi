@@ -35,7 +35,6 @@
 // SmartThings Library for ESP8266WiFi
 //******************************************************************************************
 #include <SmartThingsESP8266WiFi.h>
-#include <ArduinoOTA.h>
 
 //******************************************************************************************
 // ST_Anything Library 
@@ -124,27 +123,6 @@ void callback(const String &msg)
 void setup()
 {
 
-  // Setup OTA Updates
-  ArduinoOTA.setPassword((const char *)"magnum7");
-  ArduinoOTA.onStart([]() {
-    Serial.println("Start");
-  });
-  ArduinoOTA.onEnd([]() {
-    Serial.println("\nEnd");
-  });
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-  });
-  ArduinoOTA.onError([](ota_error_t error) {
-    Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR) Serial.println("End Failed");
-  });
-
-  ArduinoOTA.begin();
   //******************************************************************************************
   //Declare each Device that is attached to the Arduino
   //  Notes: - For each device, there is typically a corresponding "tile" defined in your 
@@ -163,10 +141,6 @@ void setup()
   //           to match your specific use case in the ST Phone Application.
   //******************************************************************************************
 
-  //Set pins low at boot
-  //digitalWrite(PIN_LEFT_DOOR_BUTTON,HIGH);
-  //digitalWrite(PIN_RIGHT_DOOR_BUTTON,HIGH);
-  
   //Polling Sensors
   static st::PS_TemperatureHumidity sensor1(F("temphumid1"), 300, 20, PIN_TEMPHUMID, st::PS_TemperatureHumidity::DHT22);
   
@@ -196,11 +170,11 @@ void setup()
   st::Everything::callOnMsgSend = callback;
   
   //Create the SmartThings ESP8266WiFi Communications Object
-    //STATIC IP Assignment - Recommended
-    st::Everything::SmartThing = new st::SmartThingsESP8266WiFi(str_ssid, str_password, ip, gateway, subnet, dnsserver, serverPort, hubIp, hubPort, st::receiveSmartString);
+  //STATIC IP Assignment - Recommended
+  st::Everything::SmartThing = new st::SmartThingsESP8266WiFi(str_ssid, str_password, ip, gateway, subnet, dnsserver, serverPort, hubIp, hubPort, st::receiveSmartString);
  
-    //DHCP IP Assigment - Must set your router's DHCP server to provice a static IP address for this device's MAC address
-    //st::Everything::SmartThing = new st::SmartThingsESP8266WiFi(str_ssid, str_password, serverPort, hubIp, hubPort, st::receiveSmartString);
+  //DHCP IP Assigment - Must set your router's DHCP server to provice a static IP address for this device's MAC address
+  //st::Everything::SmartThing = new st::SmartThingsESP8266WiFi(str_ssid, str_password, serverPort, hubIp, hubPort, st::receiveSmartString);
 
   //Run the Everything class' init() routine which establishes WiFi communications with SmartThings Hub
   st::Everything::init();
@@ -222,8 +196,6 @@ void setup()
   //Initialize each of the devices which were added to the Everything Class
   //*****************************************************************************
   st::Everything::initDevices();
-
-  //Serial.println("Made The Change");
   
 }
 
@@ -236,5 +208,4 @@ void loop()
   //Execute the Everything run method which takes care of "Everything"
   //*****************************************************************************
   st::Everything::run();
-  ArduinoOTA.handle();
 }
